@@ -1,5 +1,5 @@
 [package]
-name = "calc"
+name = "auc"
 version = "0.1.0"
 authors = ["Elliot Lockerman <elliot@lockerman.info>"]
 

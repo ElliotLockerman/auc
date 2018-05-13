@@ -1,11 +1,29 @@
 
+use std::collections::HashMap;
+
 use std::str::FromStr;
 use ast;
+
 
 grammar;
 
 
 pub Float: f64 = <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => f64::from_str(<>).unwrap();
+
+pub UnitName: String = <r#"[a-zA-Z_]+"#> => <>.to_string();
+
+pub Unit: (String, i32) = {
+    <UnitName> => (<>, 1),
+    <n:UnitName> "^" <f:Float> => (n, f as i32),
+};
+
+
+
+pub Num: ast::Num = {
+    <Float> => ast::Num{val: <>, units: HashMap::new()},
+    <Unit+> => ast::Num{val:1.0, units: <>.iter().cloned().collect()},
+    <f:Float> <u:Unit+> => ast::Num{val:f, units: u.iter().cloned().collect()},
+}
 
 
 pub Exp: ast::Expression = {
@@ -22,11 +40,11 @@ pub T: ast::Term = {
 }
 
 pub Fact: ast::Factor = {
-    Float => ast::Factor::Num(<>),
-    <f1:Float> "^" <f2:Float> => ast::Factor::Num(f1.powf(f2)),
-    <f:Float> "^" "(" <e:Exp> ")" => ast::Factor::NPowE(f, Box::new(e)),
+    Num => ast::Factor::Num(<>),
+    // <n1:Num> "^" <n2:Num> => ast::Factor::Num(n1.pow(n2)),
+    // <n:Num> "^" "(" <e:Exp> ")" => ast::Factor::NPowE(n, Box::new(e)),
     "(" <e:Exp> ")" => ast::Factor::Exp(Box::new(e)),
-    "(" <e1:Exp> ")" "^" <f:Float> => ast::Factor::EPowN(Box::new(e1), f),
+    "(" <e1:Exp> ")" "^" <n:Num> => ast::Factor::EPowN(Box::new(e1), n),
     "(" <e1:Exp> ")" "^" "(" <e2:Exp> ")" => ast::Factor::EPowE(Box::new(e1), Box::new(e2)),
 }
 

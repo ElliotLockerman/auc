@@ -11,6 +11,7 @@ pub mod ast;
 use ast::*;
 
 
+
 fn main() {
     let mut rl = Editor::<()>::new();
 
@@ -40,31 +41,32 @@ fn main() {
 
 
 
-fn eval_exp(exp: &Expression) -> f64 {
+fn eval_exp(exp: &Expression) -> Num {
     match exp {
-        Expression::Sum(lhs, rhs) => eval_exp(lhs) + eval_term(rhs),
-        Expression::Diff(lhs, rhs) => eval_exp(lhs) - eval_term(rhs),
+        Expression::Sum(lhs, rhs) => &eval_exp(lhs) + &eval_term(rhs),
+        Expression::Diff(lhs, rhs) => &eval_exp(lhs) - &eval_term(rhs),
         Expression::Term(term) => eval_term(term),
     }
 }
 
-fn eval_term(term: &Term) -> f64 {
+fn eval_term(term: &Term) -> Num {
     match term {
-        Term::Prod(lhs, rhs) => eval_term(lhs) * eval_fact(rhs),
-        Term::Quot(lhs, rhs) => eval_term(lhs) / eval_fact(rhs),
+        Term::Prod(lhs, rhs) => &eval_term(lhs) * &eval_fact(rhs),
+        Term::Quot(lhs, rhs) => &eval_term(lhs) / &eval_fact(rhs),
         Term::Factor(fact) => eval_fact(fact),
     }
 }
 
-fn eval_fact(fact: &Factor) -> f64 {
+fn eval_fact(fact: &Factor) -> Num {
     match fact {
-        Factor::Num(n) => *n,
+        Factor::Num(n) => n.clone(),
         Factor::Exp(e) => eval_exp(e),
-        Factor::NPowE(f, e) => f.powf(eval_exp(e)),
-        Factor::EPowN(e, f) => eval_exp(e).powf(*f),
-        Factor::EPowE(e1, e2) => eval_exp(e1).powf(eval_exp(e2)),
+        Factor::NPowE(n, e) => n.pow(&eval_exp(e)),
+        Factor::EPowN(e, n) => eval_exp(e).pow(n),
+        Factor::EPowE(e1, e2) => eval_exp(e1).pow(&eval_exp(e2)),
     }
 }
+
 
 
 
