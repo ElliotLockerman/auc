@@ -2,12 +2,18 @@
 use std::str::FromStr;
 use ast;
 
-
 grammar;
 
 
-pub Float: f64 = <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> 
-    => f64::from_str(<>).unwrap();
+pub Float: f64 = {
+    <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => f64::from_str(<>).unwrap(),
+    <a:r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> 
+        "^" <b:r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => {
+        let a = f64::from_str(a).unwrap();
+        let b = f64::from_str(b).unwrap();
+        a.powf(b)
+    }
+}
 
 pub Exp: ast::Expression = {
     <e:Exp> "+" <t:T> => ast::Expression::Sum(Box::new(e), Box::new(t)),
