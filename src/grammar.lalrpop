@@ -5,15 +5,8 @@ use ast;
 grammar;
 
 
-pub Float: f64 = {
-    <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => f64::from_str(<>).unwrap(),
-    <a:r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> 
-        "^" <b:r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => {
-        let a = f64::from_str(a).unwrap();
-        let b = f64::from_str(b).unwrap();
-        a.powf(b)
-    }
-}
+pub Float: f64 = <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> => f64::from_str(<>).unwrap();
+
 
 pub Exp: ast::Expression = {
     <e:Exp> "+" <t:T> => ast::Expression::Sum(Box::new(e), Box::new(t)),
@@ -30,7 +23,11 @@ pub T: ast::Term = {
 
 pub Fact: ast::Factor = {
     Float => ast::Factor::Num(<>),
+    <f1:Float> "^" <f2:Float> => ast::Factor::Num(f1.powf(f2)),
+    <f:Float> "^" "(" <e:Exp> ")" => ast::Factor::NPowE(f, Box::new(e)),
     "(" <e:Exp> ")" => ast::Factor::Exp(Box::new(e)),
+    "(" <e1:Exp> ")" "^" <f:Float> => ast::Factor::EPowN(Box::new(e1), f),
+    "(" <e1:Exp> ")" "^" "(" <e2:Exp> ")" => ast::Factor::EPowE(Box::new(e1), Box::new(e2)),
 }
 
 

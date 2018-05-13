@@ -35,6 +35,9 @@ pub enum Term {
 pub enum Factor {
     Num(f64),
     Exp(Box<Expression>),
+    NPowE(f64, Box<Expression>),
+    EPowN(Box<Expression>, f64),
+    EPowE(Box<Expression>, Box<Expression>),
 }
 
 
