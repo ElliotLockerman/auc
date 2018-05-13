@@ -1,0 +1,32 @@
+
+use std::str::FromStr;
+use ast;
+
+
+grammar;
+
+
+pub Float: f64 = <r#"-?(0|[1-9][0-9]*)(\.([0-9]+))?([eE]([-+]?[0-9]+))?"#> 
+    => f64::from_str(<>).unwrap();
+
+pub Exp: ast::Expression = {
+    <e:Exp> "+" <t:T> => ast::Expression::Sum(Box::new(e), Box::new(t)),
+    <e:Exp> "-" <t:T> => ast::Expression::Diff(Box::new(e), Box::new(t)),
+    T => ast::Expression::Term(Box::new(<>)),
+}
+
+
+pub T: ast::Term = {
+    <t:T> "*" <f:Fact> => ast::Term::Prod(Box::new(t), Box::new(f)),
+    <t:T> "/" <f:Fact> => ast::Term::Quot(Box::new(t), Box::new(f)),
+    Fact => ast::Term::Factor(Box::new(<>)),
+}
+
+pub Fact: ast::Factor = {
+    Float => ast::Factor::Num(<>),
+    "(" <e:Exp> ")" => ast::Factor::Exp(Box::new(e)),
+}
+
+
+
+
