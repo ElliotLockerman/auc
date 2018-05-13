@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 
 use std::str::FromStr;
-use ast;
+use ast::*;
 
 
 grammar;
@@ -19,33 +19,33 @@ pub Unit: (String, i32) = {
 
 
 
-pub Num: ast::Num = {
-    <Float> => ast::Num{val: <>, units: HashMap::new()},
-    <Unit+> => ast::Num{val:1.0, units: <>.iter().cloned().collect()},
-    <f:Float> <u:Unit+> => ast::Num{val:f, units: u.iter().cloned().collect()},
+pub N: Num = {
+    <Float> => Num{val: <>, units: HashMap::new()},
+    <Unit+> => Num{val:1.0, units: <>.iter().cloned().collect()},
+    <f:Float> <u:Unit+> => Num{val:f, units: u.iter().cloned().collect()},
 }
 
 
-pub Exp: ast::Expression = {
-    <e:Exp> "+" <t:T> => ast::Expression::Sum(Box::new(e), Box::new(t)),
-    <e:Exp> "-" <t:T> => ast::Expression::Diff(Box::new(e), Box::new(t)),
-    T => ast::Expression::Term(Box::new(<>)),
+pub Exp: Expression = {
+    <e:Exp> "+" <t:T> => Expression::Sum(Box::new(e), Box::new(t)),
+    <e:Exp> "-" <t:T> => Expression::Diff(Box::new(e), Box::new(t)),
+    T => Expression::Term(Box::new(<>)),
 }
 
 
-pub T: ast::Term = {
-    <t:T> "*" <f:Fact> => ast::Term::Prod(Box::new(t), Box::new(f)),
-    <t:T> "/" <f:Fact> => ast::Term::Quot(Box::new(t), Box::new(f)),
-    Fact => ast::Term::Factor(Box::new(<>)),
+pub T: Term = {
+    <t:T> "*" <f:Fact> => Term::Prod(Box::new(t), Box::new(f)),
+    <t:T> "/" <f:Fact> => Term::Quot(Box::new(t), Box::new(f)),
+    Fact => Term::Factor(Box::new(<>)),
 }
 
-pub Fact: ast::Factor = {
-    Num => ast::Factor::Num(<>),
-    // <n1:Num> "^" <n2:Num> => ast::Factor::Num(n1.pow(n2)),
+pub Fact: Factor = {
+    N => Factor::Num(<>),
+    <f1:Float> "^" <f2:Float> => Factor::Num(Num{val: f1.powf(f2), units: HashMap::new()}),
     // <n:Num> "^" "(" <e:Exp> ")" => ast::Factor::NPowE(n, Box::new(e)),
-    "(" <e:Exp> ")" => ast::Factor::Exp(Box::new(e)),
-    "(" <e1:Exp> ")" "^" <n:Num> => ast::Factor::EPowN(Box::new(e1), n),
-    "(" <e1:Exp> ")" "^" "(" <e2:Exp> ")" => ast::Factor::EPowE(Box::new(e1), Box::new(e2)),
+    "(" <e:Exp> ")" => Factor::Exp(Box::new(e)),
+    "(" <e1:Exp> ")" "^" <n:N> => Factor::EPowN(Box::new(e1), n),
+    "(" <e1:Exp> ")" "^" "(" <e2:Exp> ")" => Factor::EPowE(Box::new(e1), Box::new(e2)),
 }
 
 

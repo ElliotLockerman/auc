@@ -138,8 +138,8 @@ impl fmt::Display for Num {
             for (name, power) in bottom_units {
                 write!(f, "{}", name)?;
 
-                if *power != 1 {
-                    write!(f, "^{} ", power)?;
+                if *power != -1 {
+                    write!(f, "^{} ", -power)?;
                 } else {
                     write!(f, " ")?;
                 }
