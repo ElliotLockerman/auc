@@ -17,7 +17,6 @@ F -> ( E )
 
 */
 
-use std;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -59,58 +58,6 @@ pub struct Num {
     pub units: HashMap<String, i32>,
 }
 
-impl Num {
-    pub fn pow(&self, other: &Num) -> Num {
-        assert!(other.units.is_empty());
-        let units = self.units.iter().map(|(k,v)| (k.clone(), *v * (other.val as i32))).collect();
-        Num{val: self.val.powf(other.val), units}
-    }
-}
-
-pub fn sum(lhs: &Num, rhs: &Num) -> Result<Num, String> {
-    if lhs.units == rhs.units {
-        Ok(Num{val: lhs.val + rhs.val, ..lhs.clone()})
-    } else {
-        Err(format!("Can't add disparate units {} and {}", lhs, rhs))
-    }
-}
-
-pub fn diff(lhs: &Num, rhs: &Num) -> Result<Num, String> {
-    if lhs.units == rhs.units {
-        Ok(Num{val: lhs.val - rhs.val, ..lhs.clone()})
-    } else {
-        Err(format!("Can't subtract disparate units {} and {}", lhs, rhs))
-    }
-}
-
-
-
-
-impl<'a> std::ops::Mul for &'a Num {
-    type Output = Num;
-
-    fn mul(self, other: &Num) -> Num {
-        let mut units = self.units.clone();
-        for (name, power) in &other.units {
-            *units.entry(name.to_string()).or_insert(0) += power;
-        }
-
-        Num{val: self.val * other.val, units}
-    }
-}
-
-impl<'a> std::ops::Div for &'a Num {
-    type Output = Num;
-
-    fn div(self, other: &Num) -> Num {
-        let mut units = self.units.clone();
-        for (name, power) in &other.units {
-            *units.entry(name.to_string()).or_insert(0) -= power;
-        }
-
-        Num{val: self.val / other.val, units}
-    }
-}
 
 
 impl fmt::Display for Num {
@@ -161,3 +108,51 @@ impl fmt::Display for Num {
     }
 
 }
+
+
+pub fn pow(lhs: &Num, rhs: &Num)  -> Result<Num, String>  {
+    if rhs.units.is_empty() {
+        let units = lhs.units.iter().map(|(k,v)| (k.clone(), *v * (rhs.val as i32))).collect();
+        Ok(Num{val: lhs.val.powf(rhs.val), units})
+    } else {
+        Err(format!("Can't raise {} to power with units {}", lhs, rhs))
+    }
+    
+}
+
+
+pub fn sum(lhs: &Num, rhs: &Num) -> Result<Num, String> {
+    if lhs.units == rhs.units {
+        Ok(Num{val: lhs.val + rhs.val, ..lhs.clone()})
+    } else {
+        Err(format!("Can't add disparate units {} and {}", lhs, rhs))
+    }
+}
+
+pub fn sub(lhs: &Num, rhs: &Num) -> Result<Num, String> {
+    if lhs.units == rhs.units {
+        Ok(Num{val: lhs.val - rhs.val, ..lhs.clone()})
+    } else {
+        Err(format!("Can't subtract disparate units {} and {}", lhs, rhs))
+    }
+}
+
+pub fn mul(lhs: &Num, rhs: &Num) -> Num {
+        let mut units = lhs.units.clone();
+        for (name, power) in &rhs.units {
+            *units.entry(name.to_string()).or_insert(0) += power;
+        }
+
+        Num{val: lhs.val * rhs.val, units}
+    }
+
+
+pub fn div(lhs: &Num, rhs: &Num) -> Num {
+    let mut units = lhs.units.clone();
+    for (name, power) in &rhs.units {
+        *units.entry(name.to_string()).or_insert(0) -= power;
+    }
+
+    Num{val: lhs.val / rhs.val, units}
+}
+
