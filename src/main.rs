@@ -30,8 +30,12 @@ fn main() {
                         continue;
                     },
                 };
-       
-                println!("{}", eval_exp(&exp));
+            
+                match eval_exp(&exp) {
+                    Ok(num) => println!("{}", num),
+                    Err(msg) => println!("{}", msg),
+                }
+                
             },
             Err(ReadlineError::Interrupted)| Err(ReadlineError::Eof) => break,
             Err(err) => println!("Error: {:?}", err),
@@ -41,29 +45,29 @@ fn main() {
 
 
 
-fn eval_exp(exp: &Expression) -> Num {
+fn eval_exp(exp: &Expression) -> Result<Num, String> {
     match exp {
-        Expression::Sum(lhs, rhs) => &eval_exp(lhs) + &eval_term(rhs),
-        Expression::Diff(lhs, rhs) => &eval_exp(lhs) - &eval_term(rhs),
+        Expression::Sum(lhs, rhs) => sum(&eval_exp(lhs)?, &eval_term(rhs)?),
+        Expression::Diff(lhs, rhs) => diff(&eval_exp(lhs)?, &eval_term(rhs)?),
         Expression::Term(term) => eval_term(term),
     }
 }
 
-fn eval_term(term: &Term) -> Num {
+fn eval_term(term: &Term) -> Result<Num, String> {
     match term {
-        Term::Prod(lhs, rhs) => &eval_term(lhs) * &eval_fact(rhs),
-        Term::Quot(lhs, rhs) => &eval_term(lhs) / &eval_fact(rhs),
+        Term::Prod(lhs, rhs) => Ok(&eval_term(lhs)? * &eval_fact(rhs)?),
+        Term::Quot(lhs, rhs) => Ok(&eval_term(lhs)? / &eval_fact(rhs)?),
         Term::Factor(fact) => eval_fact(fact),
     }
 }
 
-fn eval_fact(fact: &Factor) -> Num {
+fn eval_fact(fact: &Factor) -> Result<Num, String> {
     match fact {
-        Factor::Num(n) => n.clone(),
+        Factor::Num(n) => Ok(n.clone()),
         Factor::Exp(e) => eval_exp(e),
-        Factor::NPowE(n, e) => n.pow(&eval_exp(e)),
-        Factor::EPowN(e, n) => eval_exp(e).pow(n),
-        Factor::EPowE(e1, e2) => eval_exp(e1).pow(&eval_exp(e2)),
+        Factor::NPowE(n, e) => Ok(n.pow(&eval_exp(e)?)),
+        Factor::EPowN(e, n) => Ok(eval_exp(e)?.pow(n)),
+        Factor::EPowE(e1, e2) => Ok(eval_exp(e1)?.pow(&eval_exp(e2)?)),
     }
 }
 

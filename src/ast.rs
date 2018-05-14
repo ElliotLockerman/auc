@@ -21,6 +21,7 @@ use std;
 use std::collections::HashMap;
 use std::fmt;
 
+
 #[derive(Debug, Clone)]
 pub enum Expression {
     Sum(Box<Expression>, Box<Term>),
@@ -66,24 +67,24 @@ impl Num {
     }
 }
 
-impl<'a> std::ops::Add for &'a Num {
-    type Output = Num;
+pub fn sum(lhs: &Num, rhs: &Num) -> Result<Num, String> {
+    if lhs.units == rhs.units {
+        Ok(Num{val: lhs.val + rhs.val, ..lhs.clone()})
+    } else {
+        Err(format!("Can't add disparate units {} and {}", lhs, rhs))
+    }
+}
 
-    fn add(self, other: &Num) -> Num {
-        assert_eq!(self.units, other.units);
-        Num{val: self.val + other.val, ..self.clone()}
+pub fn diff(lhs: &Num, rhs: &Num) -> Result<Num, String> {
+    if lhs.units == rhs.units {
+        Ok(Num{val: lhs.val - rhs.val, ..lhs.clone()})
+    } else {
+        Err(format!("Can't subtract disparate units {} and {}", lhs, rhs))
     }
 }
 
 
-impl<'a> std::ops::Sub for &'a Num {
-    type Output = Num;
 
-    fn sub(self, other: &Num) -> Num {
-        assert_eq!(self.units, other.units);
-        Num{val: self.val - other.val, ..self.clone()}
-    }
-}
 
 impl<'a> std::ops::Mul for &'a Num {
     type Output = Num;
