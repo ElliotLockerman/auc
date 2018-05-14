@@ -9,7 +9,7 @@ For example, to solve the above problem, you would write
 ```
 > (1 failure / 1e6 drives hours) * 10000 drives
 ```
-and recension the solution
+and receive the solution
 
 ```
 1 failure / 100 hours 
