@@ -119,7 +119,13 @@ impl fmt::Display for Num {
         let top_units = self.units.iter().filter(|(_,v)| **v > 0);
         let mut bottom_units = self.units.iter().filter(|(_,v)| **v < 0).peekable();
 
-        write!(f, "{} ", self.val)?;
+        let (upper, lower) = if self.val >= 1.0 {
+            (self.val, 1.0)
+        } else {
+            (1.0, 1.0/self.val)
+        };
+
+        write!(f, "{} ", upper)?;
 
         for (name, power) in top_units {
             write!(f, "{}", name)?;
@@ -134,6 +140,10 @@ impl fmt::Display for Num {
 
         if bottom_units.peek().is_some() {
             write!(f, "/ ")?;
+
+            if lower != 1.0 {
+                write!(f, "{} ", lower)?;
+            }
 
             for (name, power) in bottom_units {
                 write!(f, "{}", name)?;
