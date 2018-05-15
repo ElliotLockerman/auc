@@ -41,6 +41,7 @@ pub T: Term = {
 
 pub Fact: Factor = {
     N => Factor::Num(<>),
+    "(" <e1:Exp> ")" "(" <e2:Exp> ")" => Factor::Prod(Box::new(e1),Box::new(e2)),
     <f1:Float> "^" <f2:Float> => Factor::Num(Num{val: f1.powf(f2), units: HashMap::new()}),
     // <n:Num> "^" "(" <e:Exp> ")" => ast::Factor::NPowE(n, Box::new(e)),
     "(" <e:Exp> ")" => Factor::Exp(Box::new(e)),

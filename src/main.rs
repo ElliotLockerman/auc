@@ -37,7 +37,7 @@ fn main() {
                 }
                 
             },
-            Err(ReadlineError::Interrupted)| Err(ReadlineError::Eof) => break,
+            Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => break,
             Err(err) => println!("Error: {:?}", err),
         }
     }
@@ -64,6 +64,7 @@ fn eval_term(term: &Term) -> Result<Num, String> {
 fn eval_fact(fact: &Factor) -> Result<Num, String> {
     match fact {
         Factor::Num(n) => Ok(n.clone()),
+        Factor::Prod(e1, e2) => Ok(mul(&eval_exp(e1)?, &eval_exp(e2)?)),
         Factor::Exp(e) => eval_exp(e),
         Factor::NPowE(n, e) => pow(&n, &eval_exp(e)?),
         Factor::EPowN(e, n) => pow(&eval_exp(e)?, n),

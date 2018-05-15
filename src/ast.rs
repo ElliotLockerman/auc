@@ -43,6 +43,7 @@ pub enum Term {
 #[derive(Debug, Clone)]
 pub enum Factor {
     Num(Num),
+    Prod(Box<Expression>, Box<Expression>),
     Exp(Box<Expression>),
     NPowE(Num, Box<Expression>),
     EPowN(Box<Expression>, Num),
