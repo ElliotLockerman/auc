@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 
+
 #[derive(Debug, Clone)]
 pub enum Expression {
     Sum(Box<Expression>, Box<Term>),
@@ -67,7 +68,7 @@ impl fmt::Display for Num {
         let top_units = self.units.iter().filter(|(_,v)| **v > 0);
         let mut bottom_units = self.units.iter().filter(|(_,v)| **v < 0).peekable();
 
-        let (upper, lower) = if self.val >= 1.0 {
+        let (upper, lower) = if self.val >= 1.0 || self.val <= -1.0 {
             (self.val, 1.0)
         } else {
             (1.0, 1.0/self.val)
@@ -85,23 +86,26 @@ impl fmt::Display for Num {
             }
         }
 
+        let has_bottom_units = bottom_units.peek().is_some();
+        let has_bottom_number = lower != 1.0;
 
-        if bottom_units.peek().is_some() {
+        if  has_bottom_units || has_bottom_number {
             write!(f, "/ ")?;
+        }
 
-            if lower != 1.0 {
-                write!(f, "{} ", lower)?;
+        if has_bottom_number {
+            write!(f, "{} ", lower)?;
+        }
+
+
+        for (name, power) in bottom_units {
+            write!(f, "{}", name)?;
+
+            if *power != -1 {
+                write!(f, "^{} ", -power)?;
+            } else {
+                write!(f, " ")?;
             }
-
-            for (name, power) in bottom_units {
-                write!(f, "{}", name)?;
-
-                if *power != -1 {
-                    write!(f, "^{} ", -power)?;
-                } else {
-                    write!(f, " ")?;
-                }
-            } 
         }
 
         Ok(())
